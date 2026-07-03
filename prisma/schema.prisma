@@ -1,0 +1,284 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AssetType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  FONT
+  OTHER
+}
+
+enum TemplateType {
+  PAGE
+  SECTION
+  BLOCK
+}
+
+enum HistoryAction {
+  CREATE
+  UPDATE
+  DELETE
+  MOVE
+  DUPLICATE
+  STYLE
+  PUBLISH
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  image         String?
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  projects      Project[]
+  assets        Asset[]
+  templates     Template[]
+  history       History[]
+  revisions     Revision[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String
+  description String?
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pages Page[]
+
+  @@unique([userId, slug])
+  @@index([userId])
+  @@map("projects")
+}
+
+model Page {
+  id          String     @id @default(cuid())
+  projectId   String
+  title       String
+  slug        String
+  status      PageStatus @default(DRAFT)
+  content     Json       @default("{}")
+  meta        Json       @default("{}")
+  sortOrder   Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  publishedAt DateTime?
+
+  project         Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sections        Section[]
+  publishVersions PublishVersion[]
+  revisions       Revision[]
+
+  @@unique([projectId, slug])
+  @@index([projectId])
+  @@map("pages")
+}
+
+model Section {
+  id        String   @id @default(cuid())
+  pageId    String
+  type      String   @default("section")
+  data      Json     @default("{}")
+  style     Json     @default("{}")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  page       Page        @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  containers Container[]
+
+  @@index([pageId])
+  @@map("sections")
+}
+
+model Container {
+  id        String   @id @default(cuid())
+  sectionId String
+  type      String   @default("container")
+  data      Json     @default("{}")
+  style     Json     @default("{}")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  section  Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  elements Element[]
+
+  @@index([sectionId])
+  @@map("containers")
+}
+
+model Element {
+  id          String   @id @default(cuid())
+  containerId String
+  type        String
+  props       Json     @default("{}")
+  style       Json     @default("{}")
+  children    Json     @default("[]")
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  container Container @relation(fields: [containerId], references: [id], onDelete: Cascade)
+
+  @@index([containerId])
+  @@index([type])
+  @@map("elements")
+}
+
+model Asset {
+  id           String    @id @default(cuid())
+  userId       String
+  name         String
+  filename     String
+  mimeType     String
+  size         Int
+  type         AssetType @default(OTHER)
+  url          String
+  storageKey   String
+  metadata     Json      @default("{}")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("assets")
+}
+
+model Template {
+  id          String       @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  type        TemplateType @default(PAGE)
+  content     Json         @default("{}")
+  thumbnail   String?
+  isPublic    Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@map("templates")
+}
+
+model History {
+  id        String        @id @default(cuid())
+  userId    String
+  entityId  String
+  entityType String
+  action    HistoryAction
+  snapshot  Json          @default("{}")
+  metadata  Json          @default("{}")
+  createdAt DateTime      @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([entityId, entityType])
+  @@map("history")
+}
+
+model Revision {
+  id        String   @id @default(cuid())
+  pageId    String
+  userId    String
+  version   Int
+  content   Json     @default("{}")
+  message   String?
+  createdAt DateTime @default(now())
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pageId, version])
+  @@index([pageId])
+  @@map("revisions")
+}
+
+model PublishVersion {
+  id          String   @id @default(cuid())
+  pageId      String
+  version     Int
+  content     Json     @default("{}")
+  publishedAt DateTime @default(now())
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([pageId, version])
+  @@index([pageId])
+  @@map("publish_versions")
+}
