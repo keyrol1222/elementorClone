@@ -1,10 +1,19 @@
+import "dotenv/config";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "../lib/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  throw new Error(
+    "DATABASE_URL is not set. Copy .env.example to .env and configure your PostgreSQL connection.",
+  );
+}
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: databaseUrl,
 });
 
 const adapter = new PrismaPg(pool);
