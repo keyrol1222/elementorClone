@@ -1,7 +1,6 @@
-import { Suspense } from "react";
 import Link from "next/link";
 import { Layers } from "lucide-react";
-import { LoginForm } from "@/features/auth/components/login-form";
+import { RegisterForm } from "@/features/auth/components/register-form";
 import {
   Card,
   CardContent,
@@ -10,15 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-function LoginFormFallback() {
-  return (
-    <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
-      Loading...
-    </div>
-  );
-}
-
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
       <div className="w-full max-w-md space-y-6">
@@ -26,33 +17,28 @@ export default function LoginPage() {
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <Layers className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Create an account</h1>
           <p className="text-sm text-muted-foreground">
-            Sign in to your PageCraft account
+            Get started with PageCraft for free
           </p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Sign in</CardTitle>
+            <CardTitle>Sign up</CardTitle>
             <CardDescription>
-              Enter your credentials to access the dashboard
+              Enter your details to create your account
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Suspense fallback={<LoginFormFallback />}>
-              <LoginForm />
-            </Suspense>
+            <RegisterForm />
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-muted-foreground">
-          Demo account: demo@pagecraft.dev / password123
-        </p>
         <p className="text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-primary hover:underline">
-            Sign up
+          Already have an account?{" "}
+          <Link href="/login" className="text-primary hover:underline">
+            Sign in
           </Link>
         </p>
       </div>

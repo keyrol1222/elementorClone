@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { FolderKanban, FileText, Globe, Plus } from "lucide-react";
 import { getCurrentUser } from "@/server/auth";
-import { getDashboardStats, getUserProjects } from "@/server/dashboard";
+import { listProjects } from "@/server/projects";
+import { getDashboardStats } from "@/server/dashboard";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +23,7 @@ export default async function DashboardPage() {
 
   const [stats, projects] = await Promise.all([
     getDashboardStats(user.id),
-    getUserProjects(user.id),
+    listProjects(user.id),
   ]);
 
   const statCards = [
@@ -123,8 +124,8 @@ export default async function DashboardPage() {
                     </p>
                   </div>
                   <Badge variant="secondary">
-                    {project._count.pages} page
-                    {project._count.pages !== 1 ? "s" : ""}
+                    {project.pageCount} page
+                    {project.pageCount !== 1 ? "s" : ""}
                   </Badge>
                 </Link>
               ))}

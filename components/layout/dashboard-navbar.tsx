@@ -2,6 +2,7 @@
 
 import { signOut, useSession } from "next-auth/react";
 import { LogOut, User } from "lucide-react";
+import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,15 +32,13 @@ function getInitials(name: string | null | undefined, email: string | null | und
   return email?.slice(0, 2).toUpperCase() ?? "U";
 }
 
-export function DashboardNavbar({ title = "Dashboard" }: DashboardNavbarProps) {
+export function DashboardNavbar(_props: DashboardNavbarProps) {
   const { data: session } = useSession();
   const user = session?.user;
 
   return (
     <header className="flex h-14 items-center justify-between border-b bg-background px-6">
-      <div>
-        <h1 className="text-lg font-semibold">{title}</h1>
-      </div>
+      <DashboardHeader />
 
       <div className="flex items-center gap-2">
         <ThemeToggle />

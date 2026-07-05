@@ -21,15 +21,3 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
     publishedCount,
   };
 }
-
-export async function getUserProjects(userId: string) {
-  return prisma.project.findMany({
-    where: { userId },
-    orderBy: { updatedAt: "desc" },
-    include: {
-      _count: {
-        select: { pages: true },
-      },
-    },
-  });
-}
