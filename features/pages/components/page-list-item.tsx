@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   FileText,
@@ -144,9 +145,11 @@ export function PageListItem({ projectId, page, onUpdated }: PageListItemProps) 
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          <Button variant="outline" size="sm" disabled title="Editor available in Phase 3">
-            <Pencil className="mr-2 h-4 w-4" />
-            Edit
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/editor/${projectId}/${page.id}`}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit
+            </Link>
           </Button>
 
           <DropdownMenu>
