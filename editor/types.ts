@@ -1,5 +1,7 @@
 import type { LucideIcon } from "lucide-react";
-import type { PageContent } from "@/types";
+import type { ReactElement } from "react";
+import type { EditorNode, PageContent, ResponsiveStyle } from "@/types";
+import type { WidgetRenderProps } from "@/renderer/types";
 
 export type WidgetCategory = "layout" | "basic" | "media";
 
@@ -10,6 +12,10 @@ export type WidgetDefinition = {
   icon: LucideIcon;
   description: string;
   isContainer: boolean;
+  defaultProps: Record<string, unknown>;
+  defaultStyle: ResponsiveStyle;
+  createNode: () => EditorNode;
+  render: (props: WidgetRenderProps) => ReactElement;
 };
 
 export type EditorPanel =
