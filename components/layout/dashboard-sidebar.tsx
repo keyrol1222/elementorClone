@@ -31,7 +31,6 @@ const navItems = [
     title: "Templates",
     href: "/dashboard/templates",
     icon: Layers,
-    disabled: true,
   },
   {
     title: "Settings",

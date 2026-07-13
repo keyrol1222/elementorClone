@@ -1,6 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import {
+  GitBranch,
   History,
   Layers,
   LayoutGrid,
@@ -8,11 +10,7 @@ import {
   Settings,
 } from "lucide-react";
 import type { EditorPanel } from "@/editor/types";
-import { HistoryPanel } from "@/editor/components/panels/history-panel";
-import { NavigatorPanel } from "@/editor/components/panels/navigator-panel";
-import { SettingsPanel } from "@/editor/components/panels/settings-panel";
-import { StructurePanel } from "@/editor/components/panels/structure-panel";
-import { WidgetsPanel } from "@/editor/components/panels/widgets-panel";
+import { MotionPanel } from "@/components/motion";
 import { useEditorStore } from "@/store/editor-store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -21,6 +19,54 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+const WidgetsPanel = dynamic(
+  () =>
+    import("@/editor/components/panels/widgets-panel").then(
+      (mod) => mod.WidgetsPanel,
+    ),
+  { ssr: false },
+);
+
+const StructurePanel = dynamic(
+  () =>
+    import("@/editor/components/panels/structure-panel").then(
+      (mod) => mod.StructurePanel,
+    ),
+  { ssr: false },
+);
+
+const NavigatorPanel = dynamic(
+  () =>
+    import("@/editor/components/panels/navigator-panel").then(
+      (mod) => mod.NavigatorPanel,
+    ),
+  { ssr: false },
+);
+
+const HistoryPanel = dynamic(
+  () =>
+    import("@/editor/components/panels/history-panel").then(
+      (mod) => mod.HistoryPanel,
+    ),
+  { ssr: false },
+);
+
+const VersionsPanel = dynamic(
+  () =>
+    import("@/editor/components/panels/versions-panel").then(
+      (mod) => mod.VersionsPanel,
+    ),
+  { ssr: false },
+);
+
+const SettingsPanel = dynamic(
+  () =>
+    import("@/editor/components/panels/settings-panel").then(
+      (mod) => mod.SettingsPanel,
+    ),
+  { ssr: false },
+);
 
 const panels: {
   id: EditorPanel;
@@ -31,6 +77,7 @@ const panels: {
   { id: "structure", icon: LayoutGrid, label: "Structure" },
   { id: "navigator", icon: ListTree, label: "Navigator" },
   { id: "history", icon: History, label: "History" },
+  { id: "versions", icon: GitBranch, label: "Versions" },
   { id: "settings", icon: Settings, label: "Settings" },
 ];
 
@@ -44,6 +91,8 @@ function PanelContent({ panel }: { panel: EditorPanel }) {
       return <NavigatorPanel />;
     case "history":
       return <HistoryPanel />;
+    case "versions":
+      return <VersionsPanel />;
     case "settings":
       return <SettingsPanel />;
     default:
@@ -85,7 +134,9 @@ export function EditorLeftSidebar() {
       </div>
 
       <div className="min-h-0 flex-1">
-        <PanelContent panel={activePanel} />
+        <MotionPanel key={activePanel}>
+          <PanelContent panel={activePanel} />
+        </MotionPanel>
       </div>
     </aside>
   );

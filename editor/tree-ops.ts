@@ -20,6 +20,25 @@ export function cloneTree(nodes: EditorNode[]): EditorNode[] {
   }));
 }
 
+function createNodeId(type: string): string {
+  return `${type}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+/** Deep-clone a node tree and assign fresh IDs (for paste / duplicate). */
+export function cloneNodeWithNewIds(node: EditorNode): EditorNode {
+  return {
+    id: createNodeId(node.type),
+    type: node.type,
+    props: { ...node.props },
+    style: {
+      desktop: node.style.desktop ? { ...node.style.desktop } : undefined,
+      tablet: node.style.tablet ? { ...node.style.tablet } : undefined,
+      mobile: node.style.mobile ? { ...node.style.mobile } : undefined,
+    },
+    children: node.children.map(cloneNodeWithNewIds),
+  };
+}
+
 export function findNode(nodes: EditorNode[], nodeId: string): EditorNode | null {
   for (const node of nodes) {
     if (node.id === nodeId) {

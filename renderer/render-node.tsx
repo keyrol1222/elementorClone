@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { memo, type ReactElement } from "react";
 import type { EditorNode } from "@/types";
 import type { RenderContext, WidgetRenderProps } from "@/renderer/types";
 import { resolveNodeStyle } from "@/renderer/types";
@@ -23,7 +23,7 @@ function UnknownWidget({ node }: { node: EditorNode }) {
   );
 }
 
-export function RenderNode({
+function RenderNodeComponent({
   node,
   context,
   parentId,
@@ -111,3 +111,20 @@ export function RenderNode({
     </SortableNode>
   );
 }
+
+function propsAreEqual(
+  prev: RenderNodeProps,
+  next: RenderNodeProps,
+): boolean {
+  return (
+    prev.node === next.node &&
+    prev.parentId === next.parentId &&
+    prev.index === next.index &&
+    prev.context.mode === next.context.mode &&
+    prev.context.device === next.context.device &&
+    prev.context.selectedNodeId === next.context.selectedNodeId &&
+    prev.context.onSelectNode === next.context.onSelectNode
+  );
+}
+
+export const RenderNode = memo(RenderNodeComponent, propsAreEqual);

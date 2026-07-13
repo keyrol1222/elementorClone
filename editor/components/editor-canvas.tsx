@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
+import { motion } from "framer-motion";
 import { DEVICE_WIDTHS } from "@/editor/types";
 import { PageRenderer } from "@/renderer/page-renderer";
 import type { RenderContext } from "@/renderer/types";
@@ -40,12 +41,14 @@ export function EditorCanvas() {
       className="flex h-full flex-1 items-start justify-center overflow-auto bg-muted/40 p-8"
       onClick={() => handleSelectNode(null)}
     >
-      <div
+      <motion.div
+        layout
         className={cn(
-          "min-h-[600px] w-full overflow-hidden rounded-xl border bg-background shadow-sm transition-all duration-300",
+          "min-h-[600px] w-full overflow-hidden rounded-xl border bg-background shadow-sm",
           isPreviewMode && "shadow-lg",
         )}
-        style={{ maxWidth: canvasWidth }}
+        animate={{ maxWidth: canvasWidth }}
+        transition={{ type: "spring", stiffness: 260, damping: 28 }}
         onClick={(event) => event.stopPropagation()}
       >
         {!isPreviewMode && (
@@ -57,7 +60,7 @@ export function EditorCanvas() {
         )}
 
         <PageRenderer content={content} context={renderContext} />
-      </div>
+      </motion.div>
     </div>
   );
 }

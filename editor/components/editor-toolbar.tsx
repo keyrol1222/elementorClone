@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import {
   ArrowLeft,
+  ExternalLink,
   Eye,
   EyeOff,
   Loader2,
@@ -18,8 +18,8 @@ import {
   Undo2,
   Upload,
 } from "lucide-react";
-import { pagesApi } from "@/lib/api/client";
 import type { EditorDevice } from "@/editor/types";
+import { usePageSave } from "@/hooks/use-page-save";
 import { useEditorStore } from "@/store/editor-store";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -39,11 +39,12 @@ const devices: { id: EditorDevice; icon: typeof Monitor; label: string }[] = [
 
 export function EditorToolbar() {
   const router = useRouter();
-  const [isPublishing, setIsPublishing] = useState(false);
   const {
     projectId,
+    projectSlug,
     pageId,
     pageTitle,
+    pageSlug,
     pageStatus,
     device,
     setDevice,
@@ -54,16 +55,30 @@ export function EditorToolbar() {
     rightSidebarOpen,
     toggleLeftSidebar,
     toggleRightSidebar,
+    past,
+    future,
+    undo,
+    redo,
   } = useEditorStore();
 
-  async function handlePublish() {
-    setIsPublishing(true);
+  const { save, publish, isSaving, lastSavedAt, saveError } = usePageSave();
 
-    try {
-      await pagesApi.publish(projectId, pageId);
+  const canUndo = past.length > 0;
+  const canRedo = future.length > 0;
+  const liveUrl =
+    pageStatus === "PUBLISHED" ? `/p/${projectSlug}/${pageSlug}` : null;
+
+  async function handleSave() {
+    const ok = await save({ createRevision: true, message: "Manual save" });
+    if (ok) {
       router.refresh();
-    } finally {
-      setIsPublishing(false);
+    }
+  }
+
+  async function handlePublish() {
+    const page = await publish();
+    if (page) {
+      router.refresh();
     }
   }
 
@@ -87,14 +102,24 @@ export function EditorToolbar() {
         <Badge variant="secondary" className="shrink-0 text-[10px]">
           {pageStatus}
         </Badge>
-        {isDirty && (
+        {isDirty ? (
           <Badge variant="outline" className="shrink-0 text-[10px]">
             Unsaved
           </Badge>
-        )}
+        ) : lastSavedAt ? (
+          <Badge variant="outline" className="shrink-0 text-[10px]">
+            Saved
+          </Badge>
+        ) : null}
       </div>
 
       <div className="flex-1" />
+
+      {saveError && (
+        <span className="hidden max-w-[160px] truncate text-[10px] text-destructive sm:inline">
+          {saveError}
+        </span>
+      )}
 
       <div className="flex items-center gap-1">
         <Tooltip>
@@ -103,13 +128,13 @@ export function EditorToolbar() {
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              disabled
-              title="Undo — Phase 8"
+              disabled={!canUndo}
+              onClick={() => undo()}
             >
               <Undo2 className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Undo (Phase 8)</TooltipContent>
+          <TooltipContent>Undo (⌘Z)</TooltipContent>
         </Tooltip>
 
         <Tooltip>
@@ -118,13 +143,13 @@ export function EditorToolbar() {
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              disabled
-              title="Redo — Phase 8"
+              disabled={!canRedo}
+              onClick={() => redo()}
             >
               <Redo2 className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Redo (Phase 8)</TooltipContent>
+          <TooltipContent>Redo (⌘⇧Z)</TooltipContent>
         </Tooltip>
       </div>
 
@@ -174,26 +199,60 @@ export function EditorToolbar() {
             Preview
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Toggle preview mode</TooltipContent>
+        <TooltipContent>Canvas preview mode</TooltipContent>
       </Tooltip>
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-8" disabled>
-            <Save className="mr-1.5 h-3.5 w-3.5" />
+          <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+            <Link href={`/preview/${projectId}/${pageId}`} target="_blank">
+              <ExternalLink className="h-4 w-4" />
+            </Link>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Open full preview</TooltipContent>
+      </Tooltip>
+
+      {liveUrl && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8" asChild>
+              <Link href={liveUrl} target="_blank">
+                Live
+              </Link>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Open published page</TooltipContent>
+        </Tooltip>
+      )}
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8"
+            disabled={isSaving}
+            onClick={() => void handleSave()}
+          >
+            {isSaving ? (
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Save className="mr-1.5 h-3.5 w-3.5" />
+            )}
             Save
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Save (Phase 9)</TooltipContent>
+        <TooltipContent>Save draft + revision (autosaves too)</TooltipContent>
       </Tooltip>
 
       <Button
         size="sm"
         className="h-8"
-        onClick={handlePublish}
-        disabled={isPublishing}
+        onClick={() => void handlePublish()}
+        disabled={isSaving}
       >
-        {isPublishing ? (
+        {isSaving ? (
           <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
         ) : (
           <Upload className="mr-1.5 h-3.5 w-3.5" />

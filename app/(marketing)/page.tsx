@@ -9,10 +9,10 @@ import {
   Zap,
 } from "lucide-react";
 import { MarketingNavbar } from "@/components/layout/marketing-navbar";
+import { LandingHero } from "@/features/marketing/landing-hero";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -80,33 +80,7 @@ export default function LandingPage() {
     <div className="min-h-screen">
       <MarketingNavbar />
 
-      <section className="container mx-auto px-4 py-24 md:py-32">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-muted/50 px-4 py-1.5 text-sm">
-            <Sparkles className="h-4 w-4 text-primary" />
-            Visual website builder
-          </div>
-          <h1 className="mb-6 text-4xl font-bold tracking-tight md:text-6xl">
-            Build stunning websites{" "}
-            <span className="text-primary">without code</span>
-          </h1>
-          <p className="mb-8 text-lg text-muted-foreground md:text-xl">
-            PageCraft is a production-ready visual page builder with drag-and-drop
-            editing, responsive controls, and a JSON-driven render engine.
-          </p>
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button size="lg" asChild>
-              <Link href="/login">
-                Start building
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link href="#features">Explore features</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <LandingHero />
 
       <section id="features" className="border-t bg-muted/30 py-24">
         <div className="container mx-auto px-4">
@@ -123,7 +97,10 @@ export default function LandingPage() {
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
-                <Card key={feature.title} className="border bg-card/50 backdrop-blur">
+                <Card
+                  key={feature.title}
+                  className="border bg-card/50 backdrop-blur"
+                >
                   <CardHeader>
                     <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                       <Icon className="h-5 w-5" />

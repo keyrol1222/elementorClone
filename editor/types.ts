@@ -23,6 +23,7 @@ export type EditorPanel =
   | "structure"
   | "navigator"
   | "history"
+  | "versions"
   | "settings";
 
 export type EditorDevice = "desktop" | "tablet" | "mobile";
@@ -35,6 +36,7 @@ export const DEVICE_WIDTHS: Record<EditorDevice, number> = {
 
 export type EditorPageData = {
   projectId: string;
+  projectSlug: string;
   pageId: string;
   title: string;
   slug: string;

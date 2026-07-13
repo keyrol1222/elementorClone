@@ -43,26 +43,75 @@ Open [http://localhost:3000](http://localhost:3000)
 
 **Demo credentials:** `demo@pagecraft.dev` / `password123`
 
+## Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start Next.js (Turbopack) |
+| `npm run build` | Production build |
+| `npm run start` | Serve production build |
+| `npm test` | Run Vitest unit tests |
+| `npm run test:watch` | Vitest watch mode |
+| `npm run db:migrate` | Apply Prisma migrations |
+| `npm run db:seed` | Seed demo user/project/pages |
+| `npm run db:studio` | Open Prisma Studio |
+
 ## Project Structure
 
 ```
 app/           → Next.js App Router pages & API routes
-components/    → Shared UI & layout components
-modules/       → Domain modules (Phase 2+)
-features/      → Feature-specific components & logic
-lib/           → Utilities, auth, prisma, storage
+components/    → Shared UI, motion helpers, virtual list
+features/      → Feature-specific components (auth, projects, templates, preview)
+lib/           → Utilities, auth, prisma, validations, styles
 hooks/         → Custom React hooks
 store/         → Zustand stores
 prisma/        → Schema, migrations, seed
 server/        → Server-side services
 types/         → Shared TypeScript types
-editor/        → Visual editor (Phase 3+)
-widgets/       → Widget definitions (Phase 6+)
-renderer/      → JSON render engine (Phase 4+)
+editor/        → Visual editor shell, DnD, history, properties
+widgets/       → Self-registering widget modules
+renderer/      → JSON render engine
+docs/          → Architecture & deployment guides
 ```
+
+## Features
+
+- Visual drag-and-drop editor with Elementor-like nesting
+- Device-aware styles (desktop / tablet / mobile)
+- Properties panel (typography, spacing, border, background, effects)
+- Undo/redo history + clipboard shortcuts
+- Autosave, revisions, publish versions
+- Templates (save / apply)
+- Public published pages at `/p/{projectSlug}/{pageSlug}`
+- Draft preview at `/preview/{projectId}/{pageId}`
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Deployment](docs/DEPLOYMENT.md)
 
 ## Development Phases
 
-This project is built incrementally in 10 phases. See the project brief for details.
+All 10 phases are complete:
 
-**Current phase:** Phase 1 — Project Initialization ✅
+1. Project initialization
+2. Auth + projects/pages CRUD
+3. Editor layout
+4. JSON renderer
+5. Drag and drop
+6. Widget system
+7. Properties panel
+8. History + shortcuts
+9. Publishing, versioning, preview, templates, autosave
+10. Optimization, animations, performance, testing, docs, deployment
+
+## Environment Variables
+
+See [`.env.example`](.env.example). Required:
+
+```
+DATABASE_URL=
+AUTH_SECRET=
+AUTH_URL=
+NEXTAUTH_URL=
+```
